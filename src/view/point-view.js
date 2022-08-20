@@ -2,7 +2,7 @@ import {createElement} from '../render.js';
 import {humanizeDate} from '../utils.js';
 
 const createPointsTemplate = (point) => {
-  const {basePrice, dateFrom, dateTo, destination, id, offers, type} = point;
+  const {basePrice, dateFrom, dateTo, destination, offers, type} = point;
 
   return (`
     <li class="trip-events__item">
