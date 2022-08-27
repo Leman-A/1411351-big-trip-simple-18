@@ -1,4 +1,5 @@
-import {getRandomInteger, humanizeTime} from '../utils.js';
+import { getRandomInteger } from '../utils.js';
+import { getOffers } from './offers.js';
 
 const generateCities = () => {
 
@@ -49,40 +50,52 @@ const generatePointType = () => {
 
   return pointType[randomIndex];
 };
-
-const generateOffers = () => {
-
-  const offers =
-  {
-    id: 1,
-    title: 'Upgrade to a business class',
-    price: 120
-  };
-
-  return offers;
+const generatePictures = () => {
+  const pictures = [];
+  for (let i = 0; i < getRandomInteger(0, 10); i++) {
+    pictures.push({
+      src: `http://picsum.photos/300/200?r=0.076256300516331${getRandomInteger(0, 9)}`,
+      description: generateDescription()
+    });
+  }
+  return pictures;
 };
 
-export const generateDestination = () => ({
-  id: 1,
+const generateDestination = (idValue) => ({
+  id: idValue,
   description: generateDescription(),
   name: generateCities(),
-  pictures: [
-    {
-      src: 'http://picsum.photos/300/200?r=0.0762563005163317',
-      description: 'Chamonix parliament building',
-    }
-  ]
+  pictures: generatePictures()
 }
 );
 
-export const generatePoint = () => ({
-  basePrice: 1100,
-  dateFrom: humanizeTime('2019-07-10T22:55:56.845Z'),
-  dateTo: humanizeTime('2019-07-11T11:22:13.375Z'),
-  destination: generateDestination(),
+export const destinations = [];
+for (let i = 0; i < 10; i++) {
+  destinations.push(generateDestination(i));
+}
+
+export const generateDataPoint = () => ({
+  basePrice: getRandomInteger(200, 3000),
+  dateFrom: new Date(getRandomInteger(2010, 2022), getRandomInteger(0, 12), getRandomInteger(0, 31), getRandomInteger(0, 24), getRandomInteger(0, 60)),
+  dateTo: new Date(),
+  destination: getRandomInteger(0, 9),
   id: '0',
-  offers: generateOffers(),
+  offers: [],
   type: generatePointType(),
 });
 
+export const generatePoint = () => {
+  const dataPoint = generateDataPoint();
+  const dataType = dataPoint.type;
+  const getOffersId = function() {
+    for (let i = 0; i <= getOffers().length; i++) {
+      if (dataType === getOffers()[i].type) {
+        return getOffers()[i].offers;
+      }
+    }
+  };
+  const OffersId = () => getOffersId().map((offer) => offer.id);
+  dataPoint.offers = OffersId();
 
+  return dataPoint;
+};
