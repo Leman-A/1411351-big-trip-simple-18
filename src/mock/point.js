@@ -1,15 +1,14 @@
 import { getRandomInteger } from '../utils.js';
 import { getOffers } from './offers.js';
 
+export const cities = [
+  'London',
+  'Dubai',
+  'Kazan',
+  'Los Angeles'
+];
+
 const generateCities = () => {
-
-  const cities = [
-    'London',
-    'Dubai',
-    'Kazan',
-    'Los Angeles'
-  ];
-
   const randomIndex = getRandomInteger(0, cities.length - 1);
 
   return cities[randomIndex];
@@ -32,19 +31,19 @@ const generateDescription = () => {
   return descriptions[randomIndex];
 };
 
-const generatePointType = () => {
+export const pointType = [
+  'taxi',
+  'bus',
+  'train',
+  'ship',
+  'drive',
+  'flight',
+  'check-in',
+  'sightseeing',
+  'restaurant'
+];
 
-  const pointType = [
-    'taxi',
-    'bus',
-    'train',
-    'ship',
-    'drive',
-    'flight',
-    'check-in',
-    'sightseeing',
-    'restaurant'
-  ];
+const generatePointType = () => {
 
   const randomIndex = getRandomInteger(0, pointType.length - 1);
 
@@ -87,15 +86,9 @@ export const generateDataPoint = () => ({
 export const generatePoint = () => {
   const dataPoint = generateDataPoint();
   const dataType = dataPoint.type;
-  const getOffersId = function() {
-    for (let i = 0; i <= getOffers().length; i++) {
-      if (dataType === getOffers()[i].type) {
-        return getOffers()[i].offers;
-      }
-    }
-  };
-  const OffersId = () => getOffersId().map((offer) => offer.id);
-  dataPoint.offers = OffersId();
-
+  const getOffersId = getOffers().find((offer) => offer.type === dataType).offers.map((offer) => offer.id);
+  dataPoint.offers = getOffersId;
+  dataPoint.offers.pop();
   return dataPoint;
 };
+
