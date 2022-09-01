@@ -11,15 +11,52 @@ export default class BoardPresenter {
   init = (boardContainer, pointsModel) => {
     this.boardContainer = boardContainer;
     this.pointsModel = pointsModel;
-    this.boardPoints = this.pointsModel.getPoints();
+    this.boardPoints = this.pointsModel.points;
 
     render(new SortView(), this.boardContainer);
     render(this.eventsList, this.boardContainer);
-    render(new NewPointView(this.boardPoints[1]), this.eventsList.getElement());
-    render(new EditPointView(this.boardPoints[0]), this.eventsList.getElement());
+    render(new NewPointView(this.boardPoints[1]), this.eventsList.element);
 
     for (let i = 0; i < this.boardPoints.length; i++) {
-      render(new PointsView(this.boardPoints[i]), this.eventsList.getElement());
+      this.#renderPoint(this.boardPoints[i]);
     }
+  };
+
+  #renderPoint = (point) => {
+    const pointComponent = new PointsView(point);
+    const editPointComponent = new EditPointView(point);
+
+    const replaceEditFormToPoint = () => {
+      this.eventsList.element.replaceChild(pointComponent.element, editPointComponent.element);
+    };
+
+    const replacePointToEditForm = () => {
+      this.eventsList.element.replaceChild(editPointComponent.element, pointComponent.element);
+    };
+
+    const onEscKeyDown = (evt) => {
+      if (evt.key === 'Escape' || evt.key === 'Esc') {
+        evt.preventDefault();
+        replaceEditFormToPoint();
+        document.removeEventListener('keydown', onEscKeyDown);
+      }
+    };
+
+    pointComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+      replacePointToEditForm();
+      document.addEventListener('keydown', onEscKeyDown);
+    });
+
+    editPointComponent.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
+      replaceEditFormToPoint();
+      document.addEventListener('keydown', onEscKeyDown);
+    });
+
+    editPointComponent.element.querySelector('form').addEventListener('submit', (evt) => {
+      evt.preventDefaul();
+      replaceEditFormToPoint();
+    });
+
+    render(pointComponent, this.eventsList.element);
   };
 }
