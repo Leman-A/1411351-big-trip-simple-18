@@ -1,8 +1,8 @@
-import {createElement} from '../render.js';
 import { humanizeDateTime } from '../utils.js';
 import { cities } from '../mock/point.js';
 import { getOffers } from '../mock/offers.js';
 import { pointType } from '../mock/point.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 const offerTemplate = (id, title, price, checked) => (
   `
@@ -156,10 +156,9 @@ const editPointTemplate = (point) => {
 `);
 };
 
-export default class EditPointView {
-  #element = null;
-
+export default class EditPointView extends AbstractView {
   constructor(point) {
+    super();
     this.point = point;
   }
 
@@ -167,15 +166,18 @@ export default class EditPointView {
     return editPointTemplate(this.point);
   }
 
-  get element() {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-    }
+  setEditClickHandler = (callback) => {
+    this._callback.editClick = callback;
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#editClickHandler);
+  };
 
-    return this.#element;
-  }
+  setFormSubmitHandler = (callback) => {
+    this._callback.editClick = callback;
+    this.element.querySelector('form').addEventListener('submit', this.#editClickHandler);
+  };
 
-  removeElement() {
-    this.#element = null;
-  }
+  #editClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.editClick();
+  };
 }
