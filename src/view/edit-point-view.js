@@ -36,20 +36,18 @@ const getAllOffersId = (type, offersInner) => {
 };
 
 const offersTemplateContainer = (allOffers) => {
-  if (allOffers !== '') {
-    return (
-      `
-        <section class="event__section  event__section--offers">
-          <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+  if (!allOffers) {return '';}
+  return (
+    `
+      <section class="event__section  event__section--offers">
+        <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
-          <div class="event__available-offers">
-            ${allOffers}
-          </div>
-        </section>
-      `
-    );
-  }
-  return '';
+        <div class="event__available-offers">
+          ${allOffers}
+        </div>
+      </section>
+    `
+  );
 };
 
 const createPictureTemplate = (pictures) => (`
@@ -173,10 +171,15 @@ export default class EditPointView extends AbstractView {
 
   setFormSubmitHandler = (callback) => {
     this._callback.editClick = callback;
-    this.element.querySelector('form').addEventListener('submit', this.#editClickHandler);
+    this.element.querySelector('form').addEventListener('submit', this.#submitClickHandler);
   };
 
   #editClickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.editClick();
+  };
+
+  #submitClickHandler = (evt) => {
     evt.preventDefault();
     this._callback.editClick();
   };

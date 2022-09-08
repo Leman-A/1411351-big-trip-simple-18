@@ -61,12 +61,11 @@ export default class BoardPresenter {
 
     editPointComponent.setEditClickHandler(() => {
       replaceEditFormToPoint();
-      document.addEventListener('keydown', onEscKeyDown);
     });
 
     editPointComponent.setFormSubmitHandler(() => {
       replaceEditFormToPoint();
-      document.addEventListener('keydown', onEscKeyDown);
+      document.removeEventListener('keydown', onEscKeyDown);
     });
 
     render(pointComponent, this.eventsList.element);

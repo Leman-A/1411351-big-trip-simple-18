@@ -34,29 +34,28 @@ const offerTemplate = (id, title, price, checked) => (
 );
 
 const getAllOffersId = (type) => {
-  if (type) {
-    const listOfAllOffers = getOffers().find((offer) => offer.type === type).offers;
-    const finalListOfOffers = listOfAllOffers.length ? listOfAllOffers.map((offer) => offerTemplate(offer.id, offer.title, offer.price)) : listOfAllOffers;
-    return finalListOfOffers.join('');
-  }
+  if (!type) {return '';}
+
+  const listOfAllOffers = getOffers().find((offer) => offer.type === type).offers;
+  const finalListOfOffers = listOfAllOffers.length ? listOfAllOffers.map((offer) => offerTemplate(offer.id, offer.title, offer.price)) : listOfAllOffers;
+  return finalListOfOffers.join('');
 };
 
 
 const offersTemplateContainer = (allOffers) => {
-  if (allOffers) {
-    return (
-      `
-        <section class="event__section  event__section--offers">
-          <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+  if (!allOffers) {return '';}
 
-          <div class="event__available-offers">
-            ${allOffers}
-          </div>
-        </section>
-      `
-    );
-  }
-  return '';
+  return (
+    `
+      <section class="event__section  event__section--offers">
+        <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+
+        <div class="event__available-offers">
+          ${allOffers}
+        </div>
+      </section>
+    `
+  );
 };
 
 const iconsTypesMarking = (typeInner, checked) => (
@@ -69,15 +68,15 @@ const iconsTypesMarking = (typeInner, checked) => (
 );
 
 const iconsTypesChecked = (typeInner) => {
-  if (typeInner) {
-    const iconsListMarking = [];
-    let checked = '';
-    for (let i = 0; i < pointType.length; i++) {
-      checked = typeInner === pointType[i] ? 'checked' : '';
-      iconsListMarking.push(iconsTypesMarking(pointType[i], checked));
-    }
-    return iconsListMarking.join('');
+  if (!typeInner) {return '';}
+
+  const iconsListMarking = [];
+  let checked = '';
+  for (let i = 0; i < pointType.length; i++) {
+    checked = typeInner === pointType[i] ? 'checked' : '';
+    iconsListMarking.push(iconsTypesMarking(pointType[i], checked));
   }
+  return iconsListMarking.join('');
 };
 
 const createPictureTemplate = (pictures) => (`
