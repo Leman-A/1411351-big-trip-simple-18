@@ -1,7 +1,8 @@
 import AbstractView from '../framework/view/abstract-view.js';
 
 const createFiltersTemplate = (filters) => {
-  const futureFilter = filters ? filters : '';
+  // eslint-disable-next-line
+  const futureFilter = filters || '';
 
   return (
     `
