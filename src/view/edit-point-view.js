@@ -3,6 +3,7 @@ import { cities } from '../mock/point.js';
 import { getOffers } from '../mock/offers.js';
 import { pointType } from '../mock/point.js';
 import AbstractView from '../framework/view/abstract-view.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 const offerTemplate = (id, title, price, checked) => (
   `
