@@ -41,11 +41,7 @@ export default class PointPresenter {
 
     this.#editPointComponent.setEditClickHandler(() => this.#replaceEditFormToPoint());
 
-    this.#editPointComponent.setFormSubmitHandler = (pointInner) => {
-      this.#changeData(pointInner);
-      this.#replaceEditFormToPoint();
-      document.removeEventListener('keydown', this.#onEscKeyDown);
-    };
+    this.#editPointComponent.setFormSubmitHandler(this.#handleFormSubmit);
 
     if (prevPointComponent === null || prevEditPointComponent === null) {
       render(this.#pointComponent, this.#pointsContainer);
@@ -53,11 +49,11 @@ export default class PointPresenter {
     }
 
     if (this.#mode === mode.DEFAULT){
-      replace(this.#editPointComponent, prevEditPointComponent);
+      replace(this.#pointComponent, prevPointComponent);
     }
 
     if (this.#mode === mode.EDITING){
-      replace(this.#pointComponent, prevPointComponent);
+      replace(this.#editPointComponent, prevEditPointComponent);
     }
 
     remove(prevPointComponent);
@@ -84,6 +80,12 @@ export default class PointPresenter {
     replace(this.#editPointComponent, this.#pointComponent);
     this.#changeMode();
     this.#mode = mode.EDITING;
+  };
+
+  #handleFormSubmit = (pointInner) => {
+    this.#changeData(pointInner);
+    this.#replaceEditFormToPoint();
+    document.removeEventListener('keydown', this.#onEscKeyDown);
   };
 
   #onEscKeyDown = (evt) => {
