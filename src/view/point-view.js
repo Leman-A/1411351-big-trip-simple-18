@@ -25,9 +25,9 @@ const createPointsTemplate = (point) => {
         <h3 class="event__title">${type} ${destination.name}</h3>
         <div class="event__schedule">
           <p class="event__time">
-            <time class="event__start-time" datetime="2019-03-18T14:30">${humanizeTime(dateFrom)}</time>
+            <time class="event__start-time" datetime=${dateFrom}>${humanizeTime(dateFrom)}</time>
             &mdash;
-            <time class="event__end-time" datetime="2019-03-18T16:05">${humanizeTime(dateTo)}</time>
+            <time class="event__end-time" datetime=${dateTo}>${humanizeTime(dateTo)}</time>
           </p>
         </div>
         <p class="event__price">
