@@ -10,8 +10,6 @@ const oneSortElement = (sortTypeItem, checkedInner = '') => (
   `
 );
 
-//  disabled checked
-
 const createSortTemplate = () => (
   `
     <form class="trip-events__trip-sort  trip-sort" action="#" method="get">
