@@ -1,16 +1,16 @@
 import { humanizeDateTime } from '../utils/utils.js';
 import { cities, DESTINATIONS } from '../mock/destinations.js';
 import { getOffers } from '../mock/offers.js';
-import { pointType } from '../mock/point.js';
+import { pointTypes } from '../mock/point.js';
 import AbstractStatefulView from '../framework/view/Abstract-Stateful-View.js';
 
 const offerTemplate = (offer, checked) => (
   `
   <div class="event__offer-selector">
-    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.title}-${offer.id}" type="checkbox" name="event-offer-${offer.title}" ${checked}>
+    <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.id}" type="checkbox" name="event-offer-${offer.title.split(' ').join('_')}" ${checked}>
 
-    <label class="event__offer-label" for="event-offer-${offer.title}-${offer.id}" data-offer-id="${offer.id}">
-      <span class="event__offer-title">${offer.title}</span>
+    <label class="event__offer-label" for="event-offer-${offer.id}" data-offer-id="${offer.id}">
+      <span class="event__offer-title"  data-offer-id="${offer.id}">${offer.title}</span>
       &plus;&euro;&nbsp;
       <span class="event__offer-price">${offer.price}</span>
     </label>
@@ -18,21 +18,18 @@ const offerTemplate = (offer, checked) => (
   `
 );
 
-const getAllOffersId = (type, offersInner) => {
-  const listOfAllOffers = getOffers().find((offer) => offer.type === type).offers;
+const getOffersTemplateByType = (type, pointOffers) => {
+  const offers = getOffers().find((offer) => offer.type === type).offers;
 
-  let checked = null;
-  const finalListOfOffers = [];
+  const pointOffersIds = pointOffers.map((offer) => offer.id);
 
-  for (let i = 0; i < listOfAllOffers.length; i++) {
-    if (offersInner[i]) {
-      checked = listOfAllOffers[i].id === offersInner[i].id ? 'checked' : '';
-    } else {
-      checked = '';
-    }
-    finalListOfOffers.push(offerTemplate(listOfAllOffers[i], checked));
-  }
-  return finalListOfOffers.join('');
+  const offersTemplates = offers.reduce((acc, offer) => {
+    const checked = pointOffersIds.includes(offer.id) ? 'checked' : '';
+
+    return [...acc, offerTemplate(offer, checked)];
+  }, []);
+
+  return offersTemplates.join('');
 };
 
 const offersTemplateContainer = (allOffers) => {
@@ -53,8 +50,8 @@ const offersTemplateContainer = (allOffers) => {
 const createPictureTemplate = (pictures) => (`<img class="event__photo" src="${pictures.src}" alt="Event photo">`);
 const createPicturesTemplate = (destination) => destination.pictures.length ? destination.pictures.map(createPictureTemplate).join('') : '';
 
-const createCityTemplate = (city) => (`<option value="${city}"></option>`);
-const createCitiesTemplate = (city) => city.length ? city.map(createCityTemplate).join('') : '';
+const createEventTypeTemplate = (city) => (`<option value="${city}"></option>`);
+const createCitiesTemplate = (city) => city.length ? city.map(createEventTypeTemplate).join('') : '';
 
 const iconsTypesMarking = (typeInner, checked) => (
   `
@@ -67,27 +64,30 @@ const iconsTypesMarking = (typeInner, checked) => (
 
 const iconsTypesChecked = (typeInner) => {
   const iconsListMarking = [];
-  let checked = '';
-  for (let i = 0; i < pointType.length; i++) {
-    checked = typeInner === pointType[i] ? 'checked' : '';
-    iconsListMarking.push(iconsTypesMarking(pointType[i], checked));
+
+  for (let i = 0; i < pointTypes.length; i++) {
+    const pointType = pointTypes[i];
+    const checked = typeInner === pointType ? 'checked' : '';
+
+    iconsListMarking.push(iconsTypesMarking(pointType, checked));
   }
+
   return iconsListMarking.join('');
 };
 
 const editPointTemplate = (point) => {
   const {basePrice, dateFrom, dateTo, destination, offers, type} = point;
 
-  const allOffersByType = getAllOffersId(type, offers);
+  const allOffersByType = getOffersTemplateByType(type, offers);
   const offersContainer = offersTemplateContainer(allOffersByType);
   const picturesTemplate = destination.pictures ? createPicturesTemplate(destination) : '';
   const iconsTyped = iconsTypesChecked(type);
   const citiesTemplate = createCitiesTemplate(cities);
   const humanizedDateFrom = dateFrom ? humanizeDateTime(dateFrom) : '';
   const humanizedDateTo = dateTo ? humanizeDateTime(dateTo) : '';
-  const destinationName = destination.name || '';
+  const destinationName = destination.name;
   const destinationDescription = destination.description || '';
-  const eventType = type || '';
+  const eventType = type;
 
   return (
     `
@@ -222,22 +222,42 @@ export default class EditPointView extends AbstractStatefulView {
 
   #eventActivateClickHandler = (evt) => {
     evt.preventDefault();
-    if (evt.target.tagName !== 'LABEL') {return;}
 
-    evt.target.parentNode.firstElementChild.checked = !evt.target.parentNode.firstElementChild.checked;
+    const element = evt.target;
 
-    const allOffers = getOffers().find((offer) => offer.type === EditPointView.parseStateToPoint(this._state).type).offers;
-    const clickedOfferElement = allOffers.find((offer) => offer.id === Number(evt.target.dataset.offerId));
+    const label = element.closest('label');
 
-    if (EditPointView.parseStateToPoint(this._state).offers[clickedOfferElement.id - 1]) {
-      delete EditPointView.parseStateToPoint(this._state).offers[clickedOfferElement.id - 1];
-    } else {
-      EditPointView.parseStateToPoint(this._state).offers[clickedOfferElement.id - 1] = clickedOfferElement;
+    if (!label) {
+      return;
     }
 
-    this.updateElement({offers: EditPointView.parseStateToPoint(this._state).offers});
+    const container = label.closest('.event__offer-selector');
+    const input = container.querySelector('input');
+
+    input.checked = !input.checked;
+
+    const { offers, type } = this._state;
+
+    const offersByType = getOffers().find((offer) => offer.type === type).offers;
+
+    const clickedOfferId = +label.dataset.offerId;
+
+    const pointOffersIds = offers.map((offer) => offer.id);
+
+    let updateOffers = [];
+
+    if (!pointOffersIds.includes(clickedOfferId)) {
+      const clickedOffer = offersByType.find((offer) => offer.id === clickedOfferId);
+
+      updateOffers = [...offers, clickedOffer];
+    } else {
+      updateOffers = offers.filter((offer) => offer.id !== clickedOfferId);
+    }
+
+    this.updateElement({ ...this._state, offers: updateOffers });
   };
 
   static parsePointToState = (point) => ({...point});
   static parseStateToPoint = (state) => ({...state});
 }
+

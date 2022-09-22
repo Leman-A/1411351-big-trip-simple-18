@@ -1,8 +1,9 @@
 import { getRandomInteger } from '../utils/utils.js';
 import { getOffers } from './offers.js';
 import { nanoid } from 'nanoid';
+import { DESTINATIONS } from './destinations.js';
 
-export const pointType = [
+export const pointTypes = [
   'taxi',
   'bus',
   'train',
@@ -15,19 +16,23 @@ export const pointType = [
 ];
 
 const generatePointType = () => {
-  const randomIndex = getRandomInteger(0, pointType.length - 1);
-  return pointType[randomIndex];
+  const randomIndex = getRandomInteger(0, pointTypes.length - 1);
+  return pointTypes[randomIndex];
 };
 
-export const generateDataPoint = () => ({
-  basePrice: getRandomInteger(200, 3000),
-  dateFrom: new Date(getRandomInteger(2010, 2025), getRandomInteger(0, 12), getRandomInteger(0, 31), getRandomInteger(0, 24), getRandomInteger(0, 60)),
-  dateTo: new Date(),
-  destination: getRandomInteger(0, 4),
-  id: nanoid(),
-  offers: [],
-  type: generatePointType(),
-});
+export const generateDataPoint = () => {
+  const destinationsIds = DESTINATIONS.reduce((acc, item) => [...acc, item.id], []);
+
+  return ({
+    basePrice: getRandomInteger(200, 3000),
+    dateFrom: new Date(getRandomInteger(2010, 2025), getRandomInteger(0, 12), getRandomInteger(0, 31), getRandomInteger(0, 24), getRandomInteger(0, 60)),
+    dateTo: new Date(),
+    destination: destinationsIds[getRandomInteger(0, destinationsIds.length - 1)],
+    id: nanoid(),
+    offers: [],
+    type: generatePointType(),
+  });
+};
 
 export const generatePoint = () => {
   const dataPoint = generateDataPoint();
@@ -37,4 +42,5 @@ export const generatePoint = () => {
   dataPoint.offers.pop();
   return dataPoint;
 };
+
 
